@@ -1,0 +1,184 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "defaultValue": "soc-copilot-lite",
+            "type": "String",
+            "metadata": {
+                "description": "The name of your app (must be globally unique)."
+            }
+        },
+        "microsoftAppId": {
+            "type": "String",
+            "metadata": {
+                "description": " The Application ID of your App Registration (Standard Multi-Tenant or Single Tenant)."
+            }
+        },
+        "microsoftAppPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "The Client Secret of your App Registration."
+            }
+        },
+        "microsoftAppTenantId": {
+            "type": "String",
+            "metadata": {
+                "description": "Your Azure AD Tenant ID."
+            }
+        },
+        "sentinelWorkspaceId": {
+            "type": "String",
+            "metadata": {
+                "description": "The Workspace ID (GUID) of your Microsoft Sentinel instance."
+            }
+        }
+    },
+    "variables": {
+        "storageName": "[toLower(concat('st', uniqueString(resourceGroup().id)))]",
+        "functionAppName": "[parameters('appName')]",
+        "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
+        "aiAccountName": "[concat(parameters('appName'), '-ai')]",
+        "botServiceName": "[parameters('appName')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('storageName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('hostingPlanName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic"
+            },
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2023-05-01",
+            "name": "[variables('aiAccountName')]",
+            "location": "eastus",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "OpenAI",
+            "properties": {
+                "customSubDomainName": "[variables('aiAccountName')]",
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts/deployments",
+            "apiVersion": "2023-05-01",
+            "name": "[concat(variables('aiAccountName'), '/gpt-4o')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "capacity": 10
+            },
+            "properties": {
+                "model": {
+                    "format": "OpenAI",
+                    "name": "gpt-4o",
+                    "version": "2024-05-13"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('functionAppName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName'))]"
+            ],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2021-08-01').keys[0].value)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "node"
+                        },
+                        {
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "~18"
+                        },
+                        {
+                            "name": "MicrosoftAppId",
+                            "value": "[parameters('microsoftAppId')]"
+                        },
+                        {
+                            "name": "MicrosoftAppPassword",
+                            "value": "[parameters('microsoftAppPassword')]"
+                        },
+                        {
+                            "name": "MicrosoftAppTenantId",
+                            "value": "[parameters('microsoftAppTenantId')]"
+                        },
+                        {
+                            "name": "MicrosoftAppType",
+                            "value": "MultiTenant"
+                        },
+                        {
+                            "name": "AI_ENDPOINT",
+                            "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName')), '2023-05-01').properties.endpoint]"
+                        },
+                        {
+                            "name": "AI_API_KEY",
+                            "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName')), '2023-05-01').key1]"
+                        },
+                        {
+                            "name": "AI_DEPLOYMENT",
+                            "value": "gpt-4o"
+                        },
+                        {
+                            "name": "AI_API_VERSION",
+                            "value": "2024-02-01"
+                        },
+                        {
+                            "name": "WORKSPACE_ID",
+                            "value": "[parameters('sentinelWorkspaceId')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.BotService/botServices",
+            "apiVersion": "2022-09-15",
+            "name": "[variables('botServiceName')]",
+            "location": "global",
+            "kind": "azurebot",
+            "sku": {
+                "name": "F0"
+            },
+            "properties": {
+                "displayName": "[parameters('appName')]",
+                "endpoint": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/messages')]",
+                "msaAppId": "[parameters('microsoftAppId')]",
+                "msaAppType": "MultiTenant",
+                "msaAppTenantId": "[parameters('microsoftAppTenantId')]"
+            }
+        }
+    ]
+}
