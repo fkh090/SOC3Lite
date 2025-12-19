@@ -1,0 +1,78 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "{{BOT_ID}}",
+  "packageName": "com.github.soccopilotlite",
+  "developer": {
+    "name": "SOC Copilot Community",
+    "websiteUrl": "https://github.com/fkh090/SOC3Lite",
+    "privacyUrl": "https://github.com/fkh090/SOC3Lite",
+    "termsOfUseUrl": "https://github.com/fkh090/SOC3Lite"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "SOC Copilot Lite",
+    "full": "SOC Copilot Lite - AI Security Assistant"
+  },
+  "description": {
+    "short": "AI assistant for Microsoft Sentinel",
+    "full": "A lightweight SOC assistant that connects Microsoft Sentinel with Azure OpenAI to triage incidents, summarize alerts, and provide KQL queries directly within Microsoft Teams."
+  },
+  "accentColor": "#0078D7",
+  "bots": [
+    {
+      "botId": "{{BOT_ID}}",
+      "scopes": [
+        "personal",
+        "team",
+        "groupchat"
+      ],
+      "commandLists": [
+        {
+          "scopes": [
+            "personal",
+            "team",
+            "groupchat"
+          ],
+          "commands": [
+            {
+              "title": "sentinel",
+              "description": "Show top 5 recent incidents"
+            },
+            {
+              "title": "summarize",
+              "description": "Summarize an incident (Usage: summarize <IncidentID>)"
+            },
+            {
+              "title": "entities",
+              "description": "Extract entities (IPs, Users) from an incident"
+            },
+            {
+              "title": "kql",
+              "description": "Generate KQL query for an incident"
+            },
+            {
+              "title": "assign-me",
+              "description": "Assign an incident to yourself"
+            },
+            {
+              "title": "ping",
+              "description": "Check bot status"
+            }
+          ]
+        }
+      ],
+      "isNotificationOnly": false,
+      "supportsFiles": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": []
+}
