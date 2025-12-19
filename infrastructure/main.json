@@ -39,7 +39,9 @@
         "functionAppName": "[parameters('appName')]",
         "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
         "aiAccountName": "[concat(parameters('appName'), '-ai')]",
-        "botServiceName": "[parameters('appName')]"
+        "botServiceName": "[parameters('appName')]",
+        "repoUrl": "https://github.com/fkh090/SOC3Lite.git",
+        "branch": "main"
     },
     "resources": [
         {
@@ -141,7 +143,7 @@
                         },
                         {
                             "name": "AI_ENDPOINT",
-                            "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName')), '2023-05-01').endpoint]"
+                            "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('aiAccountName')), '2023-05-01').properties.endpoint]"
                         },
                         {
                             "name": "AI_API_KEY",
@@ -161,7 +163,22 @@
                         }
                     ]
                 }
-            }
+            },
+            "resources": [
+                {
+                    "type": "sourcecontrols",
+                    "apiVersion": "2021-03-01",
+                    "name": "web",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
+                    ],
+                    "properties": {
+                        "repoUrl": "[variables('repoUrl')]",
+                        "branch": "[variables('branch')]",
+                        "isManualIntegration": true
+                    }
+                }
+            ]
         },
         {
             "type": "Microsoft.BotService/botServices",
