@@ -69,7 +69,7 @@
             "type": "Microsoft.CognitiveServices/accounts",
             "apiVersion": "2023-05-01",
             "name": "[variables('aiAccountName')]",
-            "location": "eastus",
+            "location": "swedencentral",
             "sku": {
                 "name": "S0"
             },
