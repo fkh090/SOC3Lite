@@ -32,6 +32,18 @@
             "metadata": {
                 "description": "The Workspace ID (GUID) of your Microsoft Sentinel instance."
             }
+        },
+        "sentinelResourceGroupName": {
+            "type": "String",
+            "metadata": {
+                "description": "The Name of the Resource Group where Sentinel is located (e.g. rg-soc-prod)."
+            }
+        },
+        "sentinelWorkspaceName": {
+            "type": "String",
+            "metadata": {
+                "description": "The Name of your Sentinel Workspace (e.g. Sentinel-Workspace-01)."
+            }
         }
     },
     "variables": {
@@ -163,6 +175,18 @@
                         {
                             "name": "WORKSPACE_ID",
                             "value": "[parameters('sentinelWorkspaceId')]"
+                        },
+                        {
+                            "name": "AZURE_SUBSCRIPTION_ID",
+                            "value": "[subscription().subscriptionId]"
+                        },
+                        {
+                            "name": "AZURE_RESOURCE_GROUP",
+                            "value": "[parameters('sentinelResourceGroupName')]"
+                        },
+                        {
+                            "name": "WORKSPACE_NAME",
+                            "value": "[parameters('sentinelWorkspaceName')]"
                         }
                     ]
                 }
