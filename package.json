@@ -1,0 +1,17 @@
+{
+  "name": "soc-copilot-lite",
+  "version": "1.0.0",
+  "description": "SOC Copilot Lite for Microsoft Teams",
+  "main": "messages/index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "botbuilder": "^4.20.0",
+    "botframework-schema": "^4.15.0",
+    "@azure/identity": "^3.2.0",
+    "@azure/monitor-query": "^1.2.0",
+    "node-fetch": "^2.6.7"
+  }
+}
