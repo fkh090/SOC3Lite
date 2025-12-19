@@ -137,7 +137,7 @@
                         },
                         {
                             "name": "MicrosoftAppType",
-                            "value": "MultiTenant"
+                            "value": "SingleTenant"
                         },
                         {
                             "name": "AI_ENDPOINT",
@@ -176,7 +176,7 @@
                 "displayName": "[parameters('appName')]",
                 "endpoint": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/messages')]",
                 "msaAppId": "[parameters('microsoftAppId')]",
-                "msaAppType": "MultiTenant",
+                "msaAppType": "SingleTenant",
                 "msaAppTenantId": "[parameters('microsoftAppTenantId')]"
             }
         }
