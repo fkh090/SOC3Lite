@@ -88,7 +88,17 @@ After deployment finishes, you must grant the bot permission to access Sentinel 
 6.  Click **Apps** -> **Manage your apps** -> **Import app**.
 7.  Upload your `soc-copilot.zip`.
 
+
+
 ---
 
 ## 🚀 Usage
 Once installed in Teams, simply start a chat with the bot and type `sentinel` to see your latest incidents!
+
+
+## ⚖️ License
+
+**© 2025 Farhad Khankishiyev **.
+
+All rights reserved. The source code in this repository is for educational and portfolio viewing purposes only.
+**No part of this code may be used, modified, or distributed without explicit written permission from the author.**
